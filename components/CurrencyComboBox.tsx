@@ -11,63 +11,46 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from "@/components/ui/command";
+import { Currencies, Currency } from "@/lib/currencies";
+import { useQuery } from "@tanstack/react-query";
+import SkeletonWrapper from "./SkeletonWrapper";
+import { user_settings } from "@prisma/client";
 
-type Status = {
-  value: string;
-  label: string;
-};
-
-const statuses: Status[] = [
-  {
-    value: "backlog",
-    label: "Backlog",
-  },
-  {
-    value: "todo",
-    label: "Todo",
-  },
-  {
-    value: "in progress",
-    label: "In Progress",
-  },
-  {
-    value: "done",
-    label: "Done",
-  },
-  {
-    value: "canceled",
-    label: "Canceled",
-  },
-];
-
-function StatusList({
+function OptionList({
   setOpen,
-  setSelectedStatus,
+  setSelectedOption: setSelectedOption,
 }: {
   setOpen: (open: boolean) => void;
-  setSelectedStatus: (status: Status | null) => void;
+  setSelectedOption: (currency: Currency | null) => void;
 }) {
   return (
     <>
       <Command>
-        <CommandInput placeholder="Filter status..." />
+        <CommandInput placeholder="Filter currency..." />
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
           <CommandGroup>
-            {statuses.map((status) => (
+            {Currencies.map((currency: Currency) => (
               <CommandItem
-                key={status.value}
-                value={status.value}
+                key={currency.value}
+                value={currency.value}
                 onSelect={(value) => {
-                  setSelectedStatus(
-                    statuses.find((priority) => priority.value === value) ||
+                  setSelectedOption(
+                    Currencies.find((priority) => priority.value === value) ||
                       null
                   );
                   setOpen(false);
                 }}
               >
-                {status.label}
+                {currency.label}
               </CommandItem>
             ))}
           </CommandGroup>
@@ -80,38 +63,62 @@ function StatusList({
 const CurrencyComboBox = () => {
   const [open, setOpen] = React.useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const [selectedStatus, setSelectedStatus] = React.useState<Status | null>(
+  const [selectedOption, setSelectedOption] = React.useState<Currency | null>(
     null
   );
 
+  const userSettings = useQuery<user_settings>({
+    queryKey: ["user-settings"],
+    queryFn: () => fetch("/api/user-settings").then((res) => res.json()),
+  });
+
+  React.useEffect(() => {
+    if (!userSettings.data) return;
+    const userCurrency = Currencies.find(
+      (currency) => currency.value === userSettings.data.currency
+    );
+
+    if (userCurrency) setSelectedOption(userCurrency);
+  }, [userSettings.data]);
+
   if (isDesktop) {
     return (
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button variant="outline" className="w-[150px] justify-start">
-            {selectedStatus ? <>{selectedStatus.label}</> : <>+ Set status</>}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[200px] p-0" align="start">
-          <StatusList setOpen={setOpen} setSelectedStatus={setSelectedStatus} />
-        </PopoverContent>
-      </Popover>
+      <SkeletonWrapper isLoading={userSettings.isFetching}>
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="w-full justify-start">
+              {selectedOption ? <>{selectedOption.label}</> : <>Set currency</>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[200px] p-0" align="start">
+            <OptionList
+              setOpen={setOpen}
+              setSelectedOption={setSelectedOption}
+            />
+          </PopoverContent>
+        </Popover>
+      </SkeletonWrapper>
     );
   }
 
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild>
-        <Button variant="outline" className="w-[150px] justify-start">
-          {selectedStatus ? <>{selectedStatus.label}</> : <>+ Set status</>}
-        </Button>
-      </DrawerTrigger>
-      <DrawerContent>
-        <div className="mt-4 border-t">
-          <StatusList setOpen={setOpen} setSelectedStatus={setSelectedStatus} />
-        </div>
-      </DrawerContent>
-    </Drawer>
+    <SkeletonWrapper isLoading={userSettings.isFetching}>
+      <Drawer open={open} onOpenChange={setOpen}>
+        <DrawerTrigger asChild>
+          <Button variant="outline" className="w-full justify-start">
+            {selectedOption ? <>{selectedOption.label}</> : <>Set currency</>}
+          </Button>
+        </DrawerTrigger>
+        <DrawerContent>
+          <div className="mt-4 border-t">
+            <OptionList
+              setOpen={setOpen}
+              setSelectedOption={setSelectedOption}
+            />
+          </div>
+        </DrawerContent>
+      </Drawer>
+    </SkeletonWrapper>
   );
 };
 

@@ -8,9 +8,10 @@ datasource db {
 }
 
 model user_settings {
-  user_id  Int     @id @default(autoincrement())
-  currency String? @db.VarChar(100)
-  group_id Int?
+  user_id       Int     @id @default(autoincrement())
+  currency      String? @db.VarChar(100)
+  group_id      Int?
+  clerk_user_id String @unique 
 }
 
 model category {
