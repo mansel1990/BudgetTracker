@@ -11,7 +11,7 @@ model user_settings {
   user_id       Int     @id @default(autoincrement())
   currency      String? @db.VarChar(100)
   group_id      Int?
-  clerk_user_id String @unique 
+  clerk_user_id String  @unique
 }
 
 model category {
@@ -54,6 +54,12 @@ model year_history {
   expense Decimal? @db.Decimal(10, 2)
 
   @@id([user_id, year])
+}
+
+model groups {
+  group_id   Int       @id @default(autoincrement())
+  group_name String?   @db.VarChar(100)
+  created_at DateTime? @default(now()) @db.Timestamp(0)
 }
 
 enum transactions_type {
