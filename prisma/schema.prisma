@@ -10,8 +10,11 @@ datasource db {
 model user_settings {
   user_id       Int     @id @default(autoincrement())
   currency      String? @db.VarChar(100)
-  group_id      Int?
+  group_id      Int     // Now referencing the Int group_id
   clerk_user_id String  @unique
+
+  // Backrelations
+  group groups @relation(fields: [group_id], references: [group_id], onDelete: Cascade)
 }
 
 model category {
@@ -20,46 +23,56 @@ model category {
   name        String    @db.VarChar(255)
   icon        String?   @db.VarChar(255)
   type        String?   @db.VarChar(50)
-  user_id     Int
+  group_id    Int      // Now referencing the Int group_id
+  group       groups   @relation(fields: [group_id], references: [group_id], onDelete: Cascade)
 }
 
 model month_history {
-  user_id Int
-  day     Int?
-  month   Int
-  year    Int
-  income  Decimal? @db.Decimal(10, 2)
-  expense Decimal? @db.Decimal(10, 2)
+  group_id Int
+  day      Int?
+  month    Int
+  year     Int
+  income   Decimal? @db.Decimal(10, 2)
+  expense  Decimal? @db.Decimal(10, 2)
+  group    groups @relation(fields: [group_id], references: [group_id], onDelete: Cascade)
 
-  @@id([user_id, year, month])
+  @@id([group_id, year, month])
 }
 
 model transactions {
-  transaction_id Int                @id @default(autoincrement())
-  created_at     DateTime?          @default(now()) @db.Timestamp(0)
-  updated_at     DateTime?          @default(now()) @db.Timestamp(0)
-  amount         Decimal?           @db.Decimal(10, 2)
-  description    String?            @db.Text
-  date           DateTime?          @db.Date
-  user_id        Int?
+  transaction_id Int     @id @default(autoincrement())
+  created_at     DateTime? @default(now()) @db.Timestamp(0)
+  updated_at     DateTime? @default(now()) @db.Timestamp(0)
+  amount         Decimal?  @db.Decimal(10, 2)
+  description    String?   @db.Text
+  date           DateTime? @db.Date
+  group_id       Int      // Now referencing the Int group_id
   type           transactions_type?
-  category       String?            @db.VarChar(255)
+  category       String?   @db.VarChar(255)
+  group          groups   @relation(fields: [group_id], references: [group_id], onDelete: Cascade)
 }
 
 model year_history {
-  user_id Int
-  month   Int?
-  year    Int
-  income  Decimal? @db.Decimal(10, 2)
-  expense Decimal? @db.Decimal(10, 2)
+  group_id Int
+  month    Int?
+  year     Int
+  income   Decimal? @db.Decimal(10, 2)
+  expense  Decimal? @db.Decimal(10, 2)
+  group    groups @relation(fields: [group_id], references: [group_id], onDelete: Cascade)
 
-  @@id([user_id, year])
+  @@id([group_id, year])
 }
 
 model groups {
-  group_id   Int       @id @default(autoincrement())
-  group_name String?   @db.VarChar(100)
+  group_id   Int     @id @default(autoincrement())  // Using auto-increment for Int group_id
+  group_name String?  @db.VarChar(100)
   created_at DateTime? @default(now()) @db.Timestamp(0)
+  created_by String       // Admin of the group
+  users      user_settings[]
+  transactions transactions[]
+  categories category[]
+  month_histories month_history[]
+  year_histories year_history[]
 }
 
 enum transactions_type {
