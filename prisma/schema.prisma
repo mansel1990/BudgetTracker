@@ -29,14 +29,14 @@ model category {
 
 model month_history {
   group_id Int
-  day      Int?
+  day      Int
   month    Int
   year     Int
   income   Decimal? @db.Decimal(10, 2)
   expense  Decimal? @db.Decimal(10, 2)
   group    groups @relation(fields: [group_id], references: [group_id], onDelete: Cascade)
 
-  @@id([group_id, year, month])
+  @@id([group_id, year, month, day])  // Include day for granularity
 }
 
 model transactions {
@@ -49,18 +49,19 @@ model transactions {
   group_id       Int      // Now referencing the Int group_id
   type           transactions_type?
   category       String?   @db.VarChar(255)
+  category_icon  String? 
   group          groups   @relation(fields: [group_id], references: [group_id], onDelete: Cascade)
 }
 
 model year_history {
   group_id Int
-  month    Int?
+  month    Int
   year     Int
   income   Decimal? @db.Decimal(10, 2)
   expense  Decimal? @db.Decimal(10, 2)
   group    groups @relation(fields: [group_id], references: [group_id], onDelete: Cascade)
 
-  @@id([group_id, year])
+  @@id([group_id, year, month])  // Include month for granularity
 }
 
 model groups {

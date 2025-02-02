@@ -135,7 +135,7 @@ const CreateCategoryDialog = ({ type, successCallback }: Props) => {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input defaultValue={""} {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormDescription>Category Name</FormDescription>
                 </FormItem>
