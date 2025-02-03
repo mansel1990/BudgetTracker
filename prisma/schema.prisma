@@ -46,7 +46,7 @@ model transactions {
   amount         Decimal?  @db.Decimal(10, 2)
   description    String?   @db.Text
   date           DateTime? @db.Date
-  group_id       Int      // Now referencing the Int group_id
+  group_id       Int      
   type           transactions_type?
   category       String?   @db.VarChar(255)
   category_icon  String? 
