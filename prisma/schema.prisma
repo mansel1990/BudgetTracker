@@ -23,8 +23,10 @@ model category {
   name        String    @db.VarChar(255)
   icon        String?   @db.VarChar(255)
   type        String?   @db.VarChar(50)
-  group_id    Int      // Now referencing the Int group_id
+  group_id    Int      
   group       groups   @relation(fields: [group_id], references: [group_id], onDelete: Cascade)
+
+  @@unique([group_id, name, type], name: "group_id_name_type")
 }
 
 model month_history {

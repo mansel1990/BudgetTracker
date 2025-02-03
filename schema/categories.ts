@@ -7,3 +7,10 @@ export const CreateCategoryScehma = z.object({
 });
 
 export type CreateCategoryScehmaType = z.infer<typeof CreateCategoryScehma>;
+
+export const DeleteCategorySchema = z.object({
+  name: z.string(),
+  type: z.enum(["expense", "income"]),
+});
+
+export type DeleteCategorySchemaType = z.infer<typeof DeleteCategorySchema>;

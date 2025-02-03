@@ -9,9 +9,6 @@ export default {
   ],
   theme: {
     extend: {
-      height: {
-        "screen-dynamic": "99vh",
-      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
