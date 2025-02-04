@@ -233,18 +233,20 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                 )}
               />
             </div>
-            <div className="grid grid-cols-5 gap-2 py-4">
-              {QUICK_FILL_OPTIONS.map(({ emoji, desc, category }) => (
-                <button
-                  key={desc}
-                  type="button"
-                  onClick={() => handleQuickFill(desc, category)}
-                  className="p-2 rounded-lg border hover:bg-gray-200"
-                >
-                  <span className="text-xl">{emoji}</span>
-                </button>
-              ))}
-            </div>
+            {type === "expense" && (
+              <div className="grid grid-cols-5 gap-2 py-4">
+                {QUICK_FILL_OPTIONS.map(({ emoji, desc, category }) => (
+                  <button
+                    key={desc}
+                    type="button"
+                    onClick={() => handleQuickFill(desc, category)}
+                    className="p-2 rounded-lg border hover:bg-gray-200"
+                  >
+                    <span className="text-xl">{emoji}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </form>
         </Form>
         <DialogFooter>

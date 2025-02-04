@@ -2,7 +2,7 @@
 
 import { DateToUTCDate } from "@/lib/helpers";
 import { useQuery } from "@tanstack/react-query";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -44,6 +44,7 @@ import DeleteTransactionDialog from "./DeleteTransactionDialog";
 interface Props {
   from: Date;
   to: Date;
+  onDataLoaded: (data: getTransactionHistoryResponseType) => void;
 }
 
 type TransactionHistoryRow = getTransactionHistoryResponseType[0];
@@ -138,7 +139,7 @@ const csvConfig = mkConfig({
   useKeysAsHeaders: true,
 });
 
-const TransactionTable = ({ from, to }: Props) => {
+const TransactionTable = ({ from, to, onDataLoaded }: Props) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const history = useQuery<getTransactionHistoryResponseType>({
@@ -150,6 +151,12 @@ const TransactionTable = ({ from, to }: Props) => {
         )}&to=${DateToUTCDate(to)}`
       ).then((res) => res.json()),
   });
+
+  useEffect(() => {
+    if (history.data) {
+      onDataLoaded(history.data);
+    }
+  }, [history.data, onDataLoaded]);
 
   const handleExportCsv = (data: any[]) => {
     const csv = generateCsv(csvConfig)(data);

@@ -6,12 +6,17 @@ import { differenceInDays, startOfMonth } from "date-fns";
 import React, { useState } from "react";
 import { toast } from "sonner";
 import TransactionTable from "./_components/TransactionTable";
+import ExpensePieChart from "./_components/ExpensePieChart";
+import { getTransactionHistoryResponseType } from "@/app/api/transactions-history/route";
 
 const TransactionsPage = () => {
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
     from: startOfMonth(new Date()),
-    to: new Date(),
+    to: new Date(new Date().setDate(new Date().getDate() + 1)),
   });
+
+  const [transactions, setTransactions] =
+    useState<getTransactionHistoryResponseType>([]);
 
   return (
     <>
@@ -42,7 +47,12 @@ const TransactionsPage = () => {
         </div>
       </div>
       <div className="container mx-auto">
-        <TransactionTable from={dateRange.from} to={dateRange.to} />
+        <TransactionTable
+          from={dateRange.from}
+          to={dateRange.to}
+          onDataLoaded={setTransactions}
+        />
+        {transactions.length > 0 && <ExpensePieChart data={transactions} />}
       </div>
     </>
   );

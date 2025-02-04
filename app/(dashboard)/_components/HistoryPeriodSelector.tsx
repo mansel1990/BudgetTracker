@@ -118,8 +118,9 @@ const MonthSelector = ({
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => {
-          const monthStr = new Date(period.year, month, 1).toLocaleString(
+        {Array.from({ length: 12 }, (_, i) => i).map((month) => {
+          // Subtract 1 from the month to get the correct zero-based month value
+          const monthStr = new Date(period.year, month - 1, 1).toLocaleString(
             "default",
             { month: "long" }
           );

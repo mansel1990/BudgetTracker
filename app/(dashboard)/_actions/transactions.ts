@@ -20,8 +20,16 @@ export const CreateTransaction = async (form: CreateTransactionSchemaType) => {
 
   const categoryRow = await prisma.category.findFirst({
     where: {
-      group_id: groupId,
-      name: category,
+      OR: [
+        {
+          group_id: groupId,
+          name: category,
+        },
+        {
+          group_id: 1,
+          name: category,
+        },
+      ],
     },
   });
 

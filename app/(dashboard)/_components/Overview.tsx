@@ -13,7 +13,7 @@ import CategoriesStats from "./CategoriesStats";
 const Overview = ({ userSettings }: { userSettings: user_settings }) => {
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
     from: startOfMonth(new Date()),
-    to: new Date(),
+    to: new Date(new Date().setDate(new Date().getDate() + 1)),
   });
 
   return (

@@ -102,12 +102,13 @@ const getMonthlyHistoryData = async (
   year: number,
   month: number
 ) => {
+  const zeroBasedMonth = month - 1;
   const result = await prisma.month_history.groupBy({
     by: ["day"],
     where: {
       group_id: groupId,
       year,
-      month,
+      month: zeroBasedMonth,
     },
     _sum: {
       expense: true,
@@ -122,7 +123,7 @@ const getMonthlyHistoryData = async (
 
   const history: HistoryData[] = [];
 
-  const daysInMonth = getDaysInMonth(new Date(year, month));
+  const daysInMonth = getDaysInMonth(new Date(year, month - 1));
 
   for (let i = 0; i < daysInMonth; i++) {
     let expense = 0,
@@ -133,7 +134,7 @@ const getMonthlyHistoryData = async (
       expense = day._sum.expense?.toNumber() ?? 0;
       income = day._sum.income?.toNumber() ?? 0;
     }
-    history.push({ expense, income, month, year, day: i });
+    history.push({ expense, income, month: zeroBasedMonth, year, day: i });
   }
 
   return history;

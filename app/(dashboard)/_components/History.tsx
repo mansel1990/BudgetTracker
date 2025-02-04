@@ -25,7 +25,7 @@ const History = ({ userSettings }: { userSettings: user_settings }) => {
   const [timeframe, setTimeframe] = useState<Timeframe>("month");
   const [period, setPeriod] = useState<Period>({
     year: new Date().getFullYear(),
-    month: new Date().getMonth(),
+    month: new Date().getMonth() === 11 ? 0 : new Date().getMonth() + 1,
   });
 
   const formatter = useMemo(() => {
@@ -106,11 +106,7 @@ const History = ({ userSettings }: { userSettings: user_settings }) => {
                     padding={{ left: 5, right: 5 }}
                     dataKey={(data) => {
                       const { year, month, day } = data;
-                      const date = new Date(
-                        year,
-                        month,
-                        day >= 0 ? day + 1 : 1
-                      );
+                      const date = new Date(year, month, day >= 0 ? day : 1);
                       if (timeframe === "year") {
                         return date.toLocaleDateString("default", {
                           month: "long",
