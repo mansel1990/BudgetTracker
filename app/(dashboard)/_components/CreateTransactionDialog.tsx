@@ -56,6 +56,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
     defaultValues: {
       type,
       date: new Date(),
+      description: "",
     },
   });
 
