@@ -6,8 +6,6 @@ import {
   CreateTransactionSchema,
   CreateTransactionSchemaType,
 } from "@/schema/transaction";
-import { currentUser } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 
 export const CreateTransaction = async (form: CreateTransactionSchemaType) => {
   const parsedBody = CreateTransactionSchema.safeParse(form);
@@ -20,6 +18,7 @@ export const CreateTransaction = async (form: CreateTransactionSchemaType) => {
   const { groupId } = await getUserGroup();
 
   const { amount, category, date, description, type } = parsedBody.data;
+  console.log("Parsed date === > ", date);
 
   const categoryRow = await prisma.category.findFirst({
     where: {
