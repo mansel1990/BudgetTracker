@@ -24,17 +24,22 @@ import { cn } from "@/lib/utils";
 
 interface Props {
   type: TransactionType;
+  value?: string;
   onChange: (value: string) => void;
 }
 
-const CategoryPicker = ({ type, onChange }: Props) => {
+const CategoryPicker = ({ type, value: selectedValue, onChange }: Props) => {
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
+  const [value, setValue] = React.useState(selectedValue || "");
 
   useEffect(() => {
     if (!value) return;
     onChange(value);
   }, [onChange, value]);
+
+  useEffect(() => {
+    setValue(selectedValue || "");
+  }, [selectedValue]);
 
   const categoriesQuery = useQuery({
     queryKey: ["categories", type],

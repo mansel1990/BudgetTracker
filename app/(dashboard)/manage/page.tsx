@@ -156,6 +156,7 @@ export const CategoryCard = ({
           <Button
             className="flex w-full border-separate items-center gap-2 rounded-t-none text-muted-foreground hover:bg-red-500/20"
             variant={"secondary"}
+            disabled={category.group_id === 1}
           >
             <TrashIcon className="h-4 w-4" />
             Remove

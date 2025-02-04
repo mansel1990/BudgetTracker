@@ -48,6 +48,23 @@ interface Props {
   type: TransactionType;
 }
 
+const QUICK_FILL_OPTIONS = [
+  { emoji: "🛍️", desc: "Amazon", category: "Shopping" },
+  { emoji: "🥦", desc: "Zepto", category: "Daily Essentials" },
+  { emoji: "👕", desc: "Dress", category: "Clothing" },
+  { emoji: "👨‍👩‍👧", desc: "Sent money to family", category: "Family" },
+  { emoji: "🏏", desc: "Cricket / Badminton", category: "Sports" },
+  { emoji: "⛽", desc: "Petrol", category: "Transport" },
+  { emoji: "🍔", desc: "Eating out/Ordered food", category: "Restaurant" },
+  { emoji: "🧸", desc: "Baby toys or needs", category: "Baby" },
+  { emoji: "🛩️", desc: "Outing", category: "Trip" },
+  { emoji: "💡", desc: "Electricity Bill", category: "Bills" },
+  { emoji: "💸", desc: "One-time expense", category: "One Time Expense" },
+  { emoji: "🏠", desc: "Monthly rent payment", category: "Rent" },
+  { emoji: "🏥", desc: "Doctor visit / Medicines", category: "Medical" },
+  { emoji: "📚", desc: "School / Online Courses", category: "Education" },
+];
+
 const CreateTransactionDialog = ({ trigger, type }: Props) => {
   const [open, setOpen] = useState(false);
 
@@ -66,6 +83,11 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
     },
     [form]
   );
+
+  const handleQuickFill = (desc: string, category: string) => {
+    form.setValue("description", desc);
+    form.setValue("category", category);
+  };
 
   const queryClient = useQueryClient();
 
@@ -167,6 +189,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                     <FormControl>
                       <CategoryPicker
                         type={type}
+                        value={form.watch("category")}
                         onChange={handleCategoryChange}
                       />
                     </FormControl>
@@ -209,6 +232,18 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                   </FormItem>
                 )}
               />
+            </div>
+            <div className="grid grid-cols-5 gap-2 py-4">
+              {QUICK_FILL_OPTIONS.map(({ emoji, desc, category }) => (
+                <button
+                  key={desc}
+                  type="button"
+                  onClick={() => handleQuickFill(desc, category)}
+                  className="p-2 rounded-lg border hover:bg-gray-200"
+                >
+                  <span className="text-xl">{emoji}</span>
+                </button>
+              ))}
             </div>
           </form>
         </Form>

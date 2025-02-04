@@ -27,7 +27,7 @@ export async function GET(request: Request) {
 
   const categories = await prisma.category.findMany({
     where: {
-      group_id: userSettings?.group_id,
+      OR: [{ group_id: userSettings?.group_id }, { group_id: 1 }],
       ...(type && { type }),
     },
     orderBy: {

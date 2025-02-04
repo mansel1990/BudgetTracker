@@ -23,8 +23,8 @@ model category {
   name        String    @db.VarChar(255)
   icon        String?   @db.VarChar(255)
   type        String?   @db.VarChar(50)
-  group_id    Int      
-  group       groups   @relation(fields: [group_id], references: [group_id], onDelete: Cascade)
+  group_id    Int
+  group       groups    @relation(fields: [group_id], references: [group_id], onDelete: Cascade)
 
   @@unique([group_id, name, type], name: "group_id_name_type")
 }

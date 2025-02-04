@@ -11,7 +11,6 @@ export const CreateTransaction = async (form: CreateTransactionSchemaType) => {
   const parsedBody = CreateTransactionSchema.safeParse(form);
 
   if (!parsedBody.success) {
-    console.log(parsedBody.error);
     throw new Error(parsedBody.error.message);
   }
 
