@@ -19,7 +19,7 @@ import {
   TrendingUp,
   UsersIcon,
 } from "lucide-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import CreateCategoryDialog from "../_components/CreateCategoryDialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -29,6 +29,7 @@ import DeleteCategoryDialog from "../_components/DeleteCategoryDialog";
 import RemoveMemberDialog from "../_components/RemoveMemberDialog";
 import { useUser } from "@clerk/nextjs";
 import EditGroup from "../_components/EditGroup";
+import { getUserDetails } from "../_actions/usersDetail";
 
 const page = () => {
   return (
@@ -185,6 +186,7 @@ const GroupDetails = () => {
   });
 
   const dataAvailable = groupQuery.data?.groupMembers?.length > 0;
+  console.log("Members ===> ", groupQuery.data?.groupMembers);
 
   return (
     <SkeletonWrapper isLoading={groupQuery.isLoading}>
@@ -242,14 +244,25 @@ const MemberCard = ({
   clerkUserId: string;
   isAdmin: boolean;
 }) => {
-  // Get user from clerk
-  const { user } = useUser();
+  const [user, setUser] = useState<{
+    imageUrl?: string;
+    firstName?: string | null;
+  } | null>(null);
+
+  useEffect(() => {
+    getUserDetails(clerkUserId).then((userDetails) => {
+      setUser({
+        imageUrl: userDetails?.imageUrl,
+        firstName: userDetails?.firstName ?? null,
+      });
+    });
+  }, [clerkUserId]);
 
   return (
     <div className="flex flex-col justify-between rounded-md border shadow-md shadow-black/[0.1] dark:shadow-white/[0.1]">
       <div className="flex flex-col items-center gap-2 p-4">
         <img
-          src={user?.imageUrl}
+          src={user?.imageUrl || "/default-avatar.png"}
           alt={user?.firstName || "User"}
           className="h-12 w-12 rounded-full"
         />
