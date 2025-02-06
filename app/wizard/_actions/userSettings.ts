@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { UpdateUserCurrencySchema } from "@/schema/userSettings";
 import { currentUser } from "@clerk/nextjs/server";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
@@ -103,6 +104,20 @@ export async function handleSwitchGroup(formData: FormData): Promise<void> {
   await prisma.user_settings.update({
     where: { clerk_user_id: user.id },
     data: { group_id: groupCode },
+  });
+
+  const cookieStore = await cookies();
+  cookieStore.set("groupId", "", {
+    path: "/",
+    httpOnly: true,
+    maxAge: 0, // Immediately expires the cookie
+  });
+
+  // Set the new groupId cookie
+  cookieStore.set("groupId", String(groupCode), {
+    httpOnly: true,
+    path: "/",
+    maxAge: 86400, // 1 day
   });
 
   // Optionally, you can log this action or trigger some additional workflows.
