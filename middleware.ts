@@ -1,12 +1,17 @@
 import { clerkMiddleware } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
+import { NextRequest, NextFetchEvent } from "next/server";
 
-export default clerkMiddleware();
+const middleware = (req: NextRequest) => {
+  const apiKey = req.headers.get("x-api-key");
+  if (apiKey === process.env.MOBILE_API_KEY) {
+    return NextResponse.next();
+  }
+  return clerkMiddleware(req, {} as NextFetchEvent);
+};
+
+export default middleware;
 
 export const config = {
-  matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
-    '/(api|trpc)(.*)',
-  ],
+  matcher: ["/((?!api/mobile|_next/static|_next/image|favicon.ico).*)"],
 };
