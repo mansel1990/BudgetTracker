@@ -1,7 +1,9 @@
 "use client";
 
 import React from "react";
-import Logo, { LogoMobile } from "./Logo";
+import TradingJournalLogo, {
+  TradingJournalLogoMobile,
+} from "./TradingJournalLogo";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "./ui/button";
@@ -12,15 +14,15 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "./ui/sheet";
 import { Menu } from "lucide-react";
 
 const items = [
-  { label: "Dashboard", link: "/budget-tracker" },
-  { label: "Transaction", link: "/budget-tracker/transactions" },
-  { label: "Manage", link: "/budget-tracker/manage" },
+  { label: "Dashboard", link: "/trading-journal" },
+  { label: "Trades", link: "/trading-journal/trades" },
+  { label: "Analytics", link: "/trading-journal/analytics" },
 ];
 
 const NavbarItem = ({
   label,
   link,
-  onClick: clickCallback,
+  onClick,
 }: {
   label: string;
   link: string;
@@ -30,7 +32,7 @@ const NavbarItem = ({
   const isActive = pathname === link;
 
   return (
-    <div className="relactive flex items-center">
+    <div className="relative flex items-center">
       <Link
         href={link}
         className={cn(
@@ -38,11 +40,7 @@ const NavbarItem = ({
           "w-full justify-start text-lg text-muted-foreground hover:text-foreground",
           isActive && "text-foreground"
         )}
-        onClick={() => {
-          if (clickCallback) {
-            clickCallback();
-          }
-        }}
+        onClick={onClick}
       >
         {label}
       </Link>
@@ -58,9 +56,9 @@ const DesktopNavbar = () => {
     <div className="hidden border-separate border-b bg-background md:block">
       <nav className="w-full flex items-center justify-between px-8">
         <div className="flex h-[80px] min-h-[60px] items-center gap-x-4">
-          <Logo />
+          <TradingJournalLogo />
           <div className="flex h-full">
-            {items.map((item, index) => (
+            {items.map((item) => (
               <NavbarItem
                 key={item.label}
                 label={item.label}
@@ -69,21 +67,19 @@ const DesktopNavbar = () => {
             ))}
           </div>
         </div>
-        <div className="flex item-center gap-2">
+        <div className="flex items-center gap-2">
           <ModeToggle />
           <div className="flex items-center space-x-4">
-            <>
-              <SignedOut>
-                <SignInButton>
-                  <button className="bg-amber-500 text-white px-4 py-2 sm:px-6 sm:py-3 text-sm sm:text-base rounded-lg hover:bg-amber-600 transition duration-200">
-                    Sign In
-                  </button>
-                </SignInButton>
-              </SignedOut>
-              <SignedIn>
-                <UserButton />
-              </SignedIn>
-            </>
+            <SignedOut>
+              <SignInButton>
+                <button className="bg-amber-500 text-white px-4 py-2 sm:px-6 sm:py-3 text-sm sm:text-base rounded-lg hover:bg-amber-600 transition duration-200">
+                  Sign In
+                </button>
+              </SignInButton>
+            </SignedOut>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
           </div>
         </div>
       </nav>
@@ -95,7 +91,7 @@ const MobileNavbar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   return (
-    <div className="block border-swparate bg-background md:hidden">
+    <div className="block border-separate bg-background md:hidden">
       <nav className="container flex items-center justify-between px-8">
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
@@ -105,39 +101,36 @@ const MobileNavbar = () => {
           </SheetTrigger>
           <SheetContent className="w-[400px] sm:w-[540px]" side="left">
             <SheetTitle>
-              <Logo />
+              <TradingJournalLogo />
             </SheetTitle>
-
             <div className="flex flex-col gap-1 pt-4">
-              {items.map((item, index) => (
+              {items.map((item) => (
                 <NavbarItem
                   key={item.label}
                   label={item.label}
                   link={item.link}
-                  onClick={() => setIsOpen((prev) => !prev)}
+                  onClick={() => setIsOpen(false)}
                 />
               ))}
             </div>
           </SheetContent>
         </Sheet>
         <div className="flex h-[80px] min-h-[60px] items-center gap-x-4">
-          <LogoMobile />
+          <TradingJournalLogoMobile />
         </div>
-        <div className="flex item-center gap-2">
+        <div className="flex items-center gap-2">
           <ModeToggle />
           <div className="flex items-center space-x-4">
-            <>
-              <SignedOut>
-                <SignInButton>
-                  <button className="bg-amber-500 text-white px-4 py-2 sm:px-6 sm:py-3 text-sm sm:text-base rounded-lg hover:bg-amber-600 transition duration-200">
-                    Sign In
-                  </button>
-                </SignInButton>
-              </SignedOut>
-              <SignedIn>
-                <UserButton />
-              </SignedIn>
-            </>
+            <SignedOut>
+              <SignInButton>
+                <button className="bg-amber-500 text-white px-4 py-2 sm:px-6 sm:py-3 text-sm sm:text-base rounded-lg hover:bg-amber-600 transition duration-200">
+                  Sign In
+                </button>
+              </SignInButton>
+            </SignedOut>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
           </div>
         </div>
       </nav>
@@ -145,7 +138,7 @@ const MobileNavbar = () => {
   );
 };
 
-const Navbar = () => {
+const TradingNavbar = () => {
   return (
     <>
       <DesktopNavbar />
@@ -154,4 +147,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default TradingNavbar;
