@@ -36,11 +36,25 @@ import {
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 
-const CreateTradingTransactionSchema = z.object({
-  amount: z.number().min(0, "Amount must be positive"),
-  type: z.enum(["deposit", "withdraw"]),
-  date: z.date(),
-});
+const CreateTradingTransactionSchema = z
+  .object({
+    amount: z.number().min(0, "Amount must be positive"),
+    type: z.enum(["deposit", "withdraw"]),
+    date: z.date(),
+    amountInMarket: z.number().min(0, "Amount must be positive").optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (
+      data.type === "withdraw" &&
+      typeof data.amountInMarket === "undefined"
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Amount in market is required for withdrawals",
+        path: ["amountInMarket"],
+      });
+    }
+  });
 
 type CreateTradingTransactionType = z.infer<
   typeof CreateTradingTransactionSchema
@@ -62,12 +76,11 @@ const TransactionDialog = ({ trigger, type }: TransactionDialogProps) => {
       form.reset();
       setOpen(false);
 
-      // Invalidate queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ["account"] });
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      // Invalidate fund stats query
+      queryClient.invalidateQueries({ queryKey: ["fund-stats"] });
     },
-    onError: (error) => {
-      toast.error("Failed to register transaction");
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to register transaction");
     },
   });
 
@@ -77,13 +90,19 @@ const TransactionDialog = ({ trigger, type }: TransactionDialogProps) => {
       type,
       date: new Date(),
       amount: 0,
+      amountInMarket: 0,
     },
   });
 
   const onSubmit = (values: CreateTradingTransactionType) => {
+    const currentMarket =
+      queryClient.getQueryData<any>(["fund-stats"])?.amountInMarket || 0;
     mutate({
       amount: values.amount,
       type: values.type,
+      ...(type === "withdraw"
+        ? { amountInMarket: values.amountInMarket }
+        : { amountInMarket: currentMarket + values.amount }),
     });
   };
 
@@ -128,6 +147,30 @@ const TransactionDialog = ({ trigger, type }: TransactionDialogProps) => {
                 </FormItem>
               )}
             />
+            {type === "withdraw" && (
+              <FormField
+                control={form.control}
+                name="amountInMarket"
+                render={({ field }) => (
+                  <FormItem className="min-w-0">
+                    <FormLabel>Amount Remaining in Market</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Enter remaining amount in market"
+                        {...field}
+                        value={field.value === 0 ? "" : field.value}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value === "" ? 0 : Number(value));
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <FormField
               control={form.control}
               name="date"

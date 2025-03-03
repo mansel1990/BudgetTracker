@@ -30,7 +30,9 @@ const StatCard = ({
         )}
       </CardHeader>
       <CardContent>
-        <div className={cn("text-2xl font-bold", valueColor)}>{value}</div>
+        <div className={cn("text-lg font-bold sm:text-2xl", valueColor)}>
+          {value}
+        </div>
         {description && (
           <p className="text-xs text-muted-foreground mt-1">{description}</p>
         )}
