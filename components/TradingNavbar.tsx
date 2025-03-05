@@ -12,12 +12,19 @@ import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import ModeToggle from "./ThemeSwitcherBtn";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "./ui/sheet";
 import { Menu } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
-const items = [
+const baseItems = [
   { label: "Dashboard", link: "/trading-journal" },
   { label: "Trades", link: "/trading-journal/trades" },
   { label: "Signals", link: "/trading-journal/signals" },
 ];
+
+const fetchAccountDetails = async () => {
+  const response = await fetch("/api/trading-journal/accounts");
+  if (!response.ok) throw new Error("Failed to fetch account details");
+  return response.json();
+};
 
 const NavbarItem = ({
   label,
@@ -51,7 +58,7 @@ const NavbarItem = ({
   );
 };
 
-const DesktopNavbar = () => {
+const DesktopNavbar = ({ items }: { items: typeof baseItems }) => {
   return (
     <div className="hidden border-separate border-b bg-background md:block">
       <nav className="w-full flex items-center justify-between px-8">
@@ -87,7 +94,7 @@ const DesktopNavbar = () => {
   );
 };
 
-const MobileNavbar = () => {
+const MobileNavbar = ({ items }: { items: typeof baseItems }) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   return (
@@ -139,10 +146,19 @@ const MobileNavbar = () => {
 };
 
 const TradingNavbar = () => {
+  const { data: account } = useQuery({
+    queryKey: ["account"],
+    queryFn: fetchAccountDetails,
+  });
+
+  const navItems = account?.is_admin
+    ? [...baseItems, { label: "Admin", link: "/trading-journal/admin" }]
+    : baseItems;
+
   return (
     <>
-      <DesktopNavbar />
-      <MobileNavbar />
+      <DesktopNavbar items={navItems} />
+      <MobileNavbar items={navItems} />
     </>
   );
 };

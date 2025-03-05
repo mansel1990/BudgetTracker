@@ -10,7 +10,7 @@ datasource db {
 model user_settings {
   user_id       Int     @id @default(autoincrement())
   currency      String? @db.VarChar(100)
-  group_id      Int     // Now referencing the Int group_id
+  group_id      Int // Now referencing the Int group_id
   clerk_user_id String  @unique
   isAutomated   Boolean @default(false)
 
@@ -37,23 +37,23 @@ model month_history {
   year     Int
   income   Decimal? @db.Decimal(10, 2)
   expense  Decimal? @db.Decimal(10, 2)
-  group    groups @relation(fields: [group_id], references: [group_id], onDelete: Cascade)
+  group    groups   @relation(fields: [group_id], references: [group_id], onDelete: Cascade)
 
-  @@id([group_id, year, month, day])  // Include day for granularity
+  @@id([group_id, year, month, day]) // Include day for granularity
 }
 
 model transactions {
-  transaction_id Int     @id @default(autoincrement())
-  created_at     DateTime? @default(now()) @db.Timestamp(0)
-  updated_at     DateTime? @default(now()) @db.Timestamp(0)
-  amount         Decimal?  @db.Decimal(10, 2)
-  description    String?   @db.Text
-  date           DateTime? @db.Date
-  group_id       Int      
+  transaction_id Int                @id @default(autoincrement())
+  created_at     DateTime?          @default(now()) @db.Timestamp(0)
+  updated_at     DateTime?          @default(now()) @db.Timestamp(0)
+  amount         Decimal?           @db.Decimal(10, 2)
+  description    String?            @db.Text
+  date           DateTime?          @db.Date
+  group_id       Int
   type           transactions_type?
-  category       String?   @db.VarChar(255)
-  category_icon  String? 
-  group          groups   @relation(fields: [group_id], references: [group_id], onDelete: Cascade)
+  category       String?            @db.VarChar(255)
+  category_icon  String?
+  group          groups             @relation(fields: [group_id], references: [group_id], onDelete: Cascade)
 }
 
 model year_history {
@@ -62,68 +62,85 @@ model year_history {
   year     Int
   income   Decimal? @db.Decimal(10, 2)
   expense  Decimal? @db.Decimal(10, 2)
-  group    groups @relation(fields: [group_id], references: [group_id], onDelete: Cascade)
+  group    groups   @relation(fields: [group_id], references: [group_id], onDelete: Cascade)
 
-  @@id([group_id, year, month])  // Include month for granularity
+  @@id([group_id, year, month]) // Include month for granularity
 }
 
 model groups {
-  group_id   Int     @id @default(autoincrement())  // Using auto-increment for Int group_id
-  group_name String?  @db.VarChar(100)
-  created_at DateTime? @default(now()) @db.Timestamp(0)
-  created_by String       // Admin of the group
-  users      user_settings[]
-  transactions transactions[]
-  categories category[]
+  group_id        Int             @id @default(autoincrement()) // Using auto-increment for Int group_id
+  group_name      String?         @db.VarChar(100)
+  created_at      DateTime?       @default(now()) @db.Timestamp(0)
+  created_by      String // Admin of the group
+  users           user_settings[]
+  transactions    transactions[]
+  categories      category[]
   month_histories month_history[]
-  year_histories year_history[]
-}
-
-model Account {
-  account_id    Int       @id @default(autoincrement())
-  userId        String    @unique // Clerk user ID
-  name          String    @db.VarChar(255)
-  created_at    DateTime  @default(now()) @db.Timestamp(0)
-  updated_at    DateTime  @updatedAt @db.Timestamp(0)
-  transactions  FundTransaction[]
-  trades        Trade[]
-
-  @@map("accounts")
-}
-
-model FundTransaction {
-  transaction_id    Int       @id @default(autoincrement())
-  account_id        Int
-  amount            Decimal   @db.Decimal(10, 2)
-  type             String    @db.VarChar(10)
-  amount_in_market  Decimal?  @db.Decimal(10, 2)
-  notes            String?   @db.Text
-  created_at       DateTime  @default(now()) @db.Timestamp(0)
-  updated_at       DateTime  @updatedAt @db.Timestamp(0)
-  account          Account   @relation(fields: [account_id], references: [account_id], onDelete: Cascade)
-
-  @@map("fund_transactions")
-}
-
-model Trade {
-  trade_id        Int       @id @default(autoincrement())
-  account_id      Int
-  symbol          String    @db.VarChar(10)
-  shares          Decimal   @db.Decimal(10, 2)
-  entry_price     Decimal   @db.Decimal(10, 2)
-  exit_price      Decimal   @db.Decimal(10, 2)
-  amount          Decimal   @db.Decimal(10, 2)
-  profit_loss     Decimal   @db.Decimal(10, 2)
-  type            String    @db.VarChar(4) // 'buy' or 'sell'
-  notes           String?   @db.Text
-  created_at      DateTime  @default(now()) @db.Timestamp(0)
-  updated_at      DateTime  @updatedAt @db.Timestamp(0)
-  account         Account   @relation(fields: [account_id], references: [account_id], onDelete: Cascade)
-
-  @@map("trades")
+  year_histories  year_history[]
 }
 
 enum transactions_type {
   income
   expense
+}
+
+model Account {
+  account_id   Int               @id @default(autoincrement())
+  userId       String            @unique // Clerk user ID
+  name         String            @db.VarChar(255)
+  is_admin     Boolean           @default(false)
+  created_at   DateTime          @default(now()) @db.Timestamp(0)
+  updated_at   DateTime          @updatedAt @db.Timestamp(0)
+  transactions FundTransaction[]
+  trades       Trade[]
+
+  tradeSignalAccess TradeSignalAccess?
+
+  @@map("accounts")
+}
+
+model FundTransaction {
+  transaction_id   Int      @id @default(autoincrement())
+  account_id       Int
+  amount           Decimal  @db.Decimal(10, 2)
+  type             String   @db.VarChar(10)
+  amount_in_market Decimal? @db.Decimal(10, 2)
+  notes            String?  @db.Text
+  created_at       DateTime @default(now()) @db.Timestamp(0)
+  updated_at       DateTime @updatedAt @db.Timestamp(0)
+  account          Account  @relation(fields: [account_id], references: [account_id], onDelete: Cascade)
+
+  @@map("fund_transactions")
+}
+
+model Trade {
+  trade_id    Int      @id @default(autoincrement())
+  account_id  Int
+  symbol      String   @db.VarChar(10)
+  shares      Decimal  @db.Decimal(10, 2)
+  entry_price Decimal  @db.Decimal(10, 2)
+  exit_price  Decimal  @db.Decimal(10, 2)
+  amount      Decimal  @db.Decimal(10, 2)
+  profit_loss Decimal  @db.Decimal(10, 2)
+  type        String   @db.VarChar(4) // 'buy' or 'sell'
+  notes       String?  @db.Text
+  created_at  DateTime @default(now()) @db.Timestamp(0)
+  updated_at  DateTime @updatedAt @db.Timestamp(0)
+  account     Account  @relation(fields: [account_id], references: [account_id], onDelete: Cascade)
+
+  @@map("trades")
+}
+
+model TradeSignalAccess {
+  access_id  Int       @id @default(autoincrement())
+  userId     String    @unique // Clerk user ID
+  status     String    @default("pending") @db.VarChar(10) // 'pending', 'approved', 'rejected'
+  expires_at DateTime?
+  created_at DateTime  @default(now()) @db.Timestamp(0)
+  updated_at DateTime  @updatedAt @db.Timestamp(0)
+
+  // Owning side: foreign key field with relation attributes.
+  account Account @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@map("tradeSignalAccess")
 }

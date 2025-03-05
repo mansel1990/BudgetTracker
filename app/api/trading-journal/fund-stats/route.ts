@@ -22,6 +22,13 @@ export async function GET() {
     });
 
     if (!account) {
+      // create account if it doesn't exist
+      await prisma.account.create({
+        data: {
+          userId: user.id,
+          name: user.firstName || "Default Account",
+        },
+      });
       return NextResponse.json(calculateFundStats([]));
     }
 

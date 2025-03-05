@@ -33,7 +33,6 @@ type ChartDataPoint = {
 
 const InvestmentTimeline = () => {
   const { data: stats } = useTradingStats();
-  console.log("Stats:", stats);
 
   // Ensure hooks are always called before returning JSX
   const chartData = useMemo(() => {
@@ -44,8 +43,6 @@ const InvestmentTimeline = () => {
   if (!stats || !stats.transactionHistory) {
     return <div>Loading...</div>;
   }
-
-  console.log("Chart Data:", JSON.stringify(chartData, null, 2));
 
   return (
     <Card className="mt-2">

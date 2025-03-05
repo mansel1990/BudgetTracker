@@ -135,7 +135,6 @@ export const CreateTransactionsBulk = async (
     .map((result) => result.data);
 
   if (transactions.length === 0) {
-    console.log("🚫 No valid transactions to insert.");
     return;
   }
 
@@ -194,7 +193,6 @@ export const CreateTransactionsBulk = async (
   );
 
   if (newTransactions.length === 0) {
-    console.log("🚫 No new transactions to insert (duplicates found)");
     throw new Error("No new transactions to insert (duplicates found)");
   }
 
