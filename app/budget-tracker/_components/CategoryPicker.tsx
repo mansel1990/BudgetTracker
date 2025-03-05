@@ -33,9 +33,10 @@ const CategoryPicker = ({ type, value: selectedValue, onChange }: Props) => {
   const [value, setValue] = React.useState(selectedValue || "");
 
   useEffect(() => {
-    if (!value) return;
-    onChange(value);
-  }, [onChange, value]);
+    if (value !== selectedValue) {
+      onChange(value);
+    }
+  }, [onChange, value, selectedValue]);
 
   useEffect(() => {
     setValue(selectedValue || "");

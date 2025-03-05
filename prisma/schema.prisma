@@ -12,6 +12,7 @@ model user_settings {
   currency      String? @db.VarChar(100)
   group_id      Int     // Now referencing the Int group_id
   clerk_user_id String  @unique
+  isAutomated   Boolean @default(false)
 
   // Backrelations
   group groups @relation(fields: [group_id], references: [group_id], onDelete: Cascade)

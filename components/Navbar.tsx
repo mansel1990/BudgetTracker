@@ -10,10 +10,12 @@ import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import ModeToggle from "./ThemeSwitcherBtn";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "./ui/sheet";
 import { Menu } from "lucide-react";
+import { useUserSettings } from "@/hooks/use-user-settings";
 
 const items = [
   { label: "Dashboard", link: "/budget-tracker" },
   { label: "Transaction", link: "/budget-tracker/transactions" },
+  { label: "Auto GPay", link: "/budget-tracker/autoGPay" },
   { label: "Manage", link: "/budget-tracker/manage" },
 ];
 
@@ -53,14 +55,23 @@ const NavbarItem = ({
   );
 };
 
+const getNavItems = (isAutomated: boolean) => {
+  if (!isAutomated) {
+    return items.filter((item) => item.label !== "Auto GPay");
+  }
+  return items;
+};
+
 const DesktopNavbar = () => {
+  const { data: userSettings } = useUserSettings();
+  const navItems = getNavItems(userSettings?.isAutomated ?? false);
   return (
     <div className="hidden border-separate border-b bg-background md:block">
       <nav className="w-full flex items-center justify-between px-8">
         <div className="flex h-[80px] min-h-[60px] items-center gap-x-4">
           <Logo />
           <div className="flex h-full">
-            {items.map((item, index) => (
+            {navItems.map((item, index) => (
               <NavbarItem
                 key={item.label}
                 label={item.label}
@@ -93,6 +104,8 @@ const DesktopNavbar = () => {
 
 const MobileNavbar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const { data: userSettings } = useUserSettings();
+  const navItems = getNavItems(userSettings?.isAutomated ?? false);
 
   return (
     <div className="block border-swparate bg-background md:hidden">
@@ -109,7 +122,7 @@ const MobileNavbar = () => {
             </SheetTitle>
 
             <div className="flex flex-col gap-1 pt-4">
-              {items.map((item, index) => (
+              {navItems.map((item, index) => (
                 <NavbarItem
                   key={item.label}
                   label={item.label}
