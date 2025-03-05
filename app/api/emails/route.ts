@@ -4,6 +4,7 @@ import imaps from "imap-simple";
 // @ts-ignore
 import { simpleParser } from "mailparser";
 import { EmailResponseSchemaType } from "@/schema/email";
+import * as cheerio from "cheerio";
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -42,7 +43,21 @@ export async function GET(req: NextRequest) {
         );
         if (!all || !all.body) return null;
 
-        const parsed = await simpleParser(all.body);
+        const parsed = await simpleParser(all.body, {
+          defaultCharset: "utf-8",
+        });
+
+        let parsedBody = parsed.text ? parsed.text.trim() : "";
+
+        if (!parsedBody && parsed.html) {
+          const $ = cheerio.load(parsed.html);
+
+          parsedBody = $("body").text().replace(/\s+/g, " ").trim();
+        }
+
+        if (!parsedBody) {
+          return null;
+        }
 
         // Skip emails that don’t have a valid subject
         if (
@@ -51,13 +66,29 @@ export async function GET(req: NextRequest) {
         )
           return null;
 
-        const body = parsed.text ? parsed.text.trim() : "";
+        const selectedDateSimple = new Date(selectedDate)
+          .toISOString()
+          .split("T")[0];
+        const parsedDateSimple = parsed.date
+          ? parsed.date.toISOString().split("T")[0]
+          : "";
+
+        // Skip if dates don't match
+        if (selectedDateSimple !== parsedDateSimple) {
+          return null;
+        }
+
+        const body = parsedBody.trim();
 
         // Extract amount
         const amountMatch = body.match(/Rs\.(\d+\.\d+)/);
         const amount = amountMatch
           ? parseFloat(amountMatch[1].replace(/,/g, ""))
           : null;
+
+        if (amount === null) {
+          return null;
+        }
 
         // Extract payee name
         const payeeMatch = body.match(

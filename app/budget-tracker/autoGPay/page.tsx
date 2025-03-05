@@ -26,6 +26,7 @@ interface Transaction {
 }
 
 const fetchEmails = async (date: string) => {
+  console.log("Selected date: ", date);
   const response = await fetch(`/api/emails?date=${date}`);
   if (!response.ok) throw new Error("Failed to fetch emails");
   return response.json();

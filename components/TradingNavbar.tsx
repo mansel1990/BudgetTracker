@@ -16,7 +16,7 @@ import { Menu } from "lucide-react";
 const items = [
   { label: "Dashboard", link: "/trading-journal" },
   { label: "Trades", link: "/trading-journal/trades" },
-  { label: "Analytics", link: "/trading-journal/analytics" },
+  { label: "Signals", link: "/trading-journal/signals" },
 ];
 
 const NavbarItem = ({

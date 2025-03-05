@@ -82,7 +82,9 @@ const EmailTable = ({
                     />
                   </TableCell>
                   <TableCell>{txn.description}</TableCell>
-                  <TableCell>₹{txn.amount.toFixed(2)}</TableCell>
+                  <TableCell>
+                    {txn.amount ? `₹${txn.amount.toFixed(2)}` : "-"}
+                  </TableCell>
                   <TableCell>
                     <CategoryPicker
                       type="expense"
