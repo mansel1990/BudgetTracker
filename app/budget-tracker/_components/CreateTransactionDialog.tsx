@@ -84,10 +84,13 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
     [form]
   );
 
-  const handleQuickFill = (desc: string, category: string) => {
-    form.setValue("description", desc);
-    form.setValue("category", category);
-  };
+  const handleQuickFill = useCallback(
+    (desc: string, category: string) => {
+      form.setValue("description", desc);
+      form.setValue("category", category);
+    },
+    [form]
+  );
 
   const queryClient = useQueryClient();
 
@@ -110,7 +113,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
         queryKey: ["overview"],
       });
 
-      setOpen((prev) => !prev);
+      setOpen(false);
     },
   });
 
@@ -189,7 +192,7 @@ const CreateTransactionDialog = ({ trigger, type }: Props) => {
                     <FormControl>
                       <CategoryPicker
                         type={type}
-                        value={form.watch("category")}
+                        value={form.getValues("category")} // Change from watch() to getValues()
                         onChange={handleCategoryChange}
                       />
                     </FormControl>
