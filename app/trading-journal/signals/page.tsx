@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import TradingSignalsTable from "./_components/TradingSignalsTable";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   checkTradeSignalAccess,
@@ -10,65 +9,15 @@ import {
 import { toast } from "sonner";
 import SkeletonWrapper from "@/components/SkeletonWrapper";
 import { Button } from "@/components/ui/button";
-
-const sampleData = [
-  {
-    aggregate_score: 8.2,
-    company_name: "Dummy Corp",
-    company_link: "/screener/dummy",
-    company_peers: [
-      {
-        company_name: "Peer 1",
-        company_symbol: "P1",
-        company_link: "/screener/dummy1",
-      },
-      {
-        company_name: "Peer 2",
-        company_symbol: "P2",
-        company_link: "/screener/dummy3",
-      },
-      {
-        company_name: "Peer 3",
-        company_symbol: "P3",
-        company_link: "/screener/dummy4",
-      },
-    ],
-    company_symbol: "dummy",
-    date: "2025-03-05T10:48:13.522883",
-    de: 0.5,
-    de_ranking: 2,
-    de_score: 7.8,
-    industry: "Software",
-    industry_pe: 20.8,
-    industry_peg: 1.5,
-    industry_piotroski: 6.5,
-    median_pe: 22.5,
-    pe: 25.3,
-    pe_score: 7.5,
-    peg: 1.2,
-    peg_ranking: 3,
-    peg_score: 8,
-    piotroski: 7,
-    piotroski_rank: 4,
-    piotroski_score: 7.2,
-    profit_growth: [4.5, 5, 4.2],
-    profit_growth_rank: [2, 1, 3],
-    profit_growth_score: 7.8,
-    profit_growth_symbol: 1,
-    roe: [15, 18, 14],
-    roe_rank: [2, 1, 3],
-    roe_symbol: 1,
-    row_score: 8,
-    sales_growth: [5.1, 6.2, 4.8],
-    sales_growth_rank: [1, 3, 2],
-    sales_growth_score: 8.5,
-    sales_growth_symbol: 1,
-    sector: "Technology",
-  },
-];
+import CompanyAnalysisTable from "./_components/CompanyAnalysisTable";
+import { useMediaQuery } from "@react-hook/media-query";
+import CompanyAnalysisMobile from "./_components/CompanyAnalysisMobile";
+import { CompanyAnalysisType } from "@/schema/companyAnalysis";
 
 const page = () => {
   const queryClient = useQueryClient();
+
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   // Fetch access status
   const { data, isLoading } = useQuery({
@@ -86,13 +35,58 @@ const page = () => {
       toast.error(`Error: ${error.message}`);
     },
   });
+
+  const { data: companyAnalysisData } = useQuery({
+    queryKey: ["companyAnalysis"],
+    queryFn: async () => {
+      const response = await fetch(
+        "/api/trading-journal/trading-signals/company-analysis"
+      );
+      if (!response.ok) throw new Error("Failed to fetch data");
+      return response.json();
+    },
+  });
+  const parsedData = companyAnalysisData?.map((item: CompanyAnalysisType) => ({
+    ...item,
+    company_peers:
+      typeof item.company_peers === "string"
+        ? JSON.parse(item.company_peers)
+        : item.company_peers,
+    sales_growth:
+      typeof item.sales_growth === "string"
+        ? JSON.parse(item.sales_growth)
+        : item.sales_growth,
+    sales_rank:
+      typeof item.sales_rank === "string"
+        ? JSON.parse(item.sales_rank)
+        : item.sales_rank,
+    profit_growth:
+      typeof item.profit_growth === "string"
+        ? JSON.parse(item.profit_growth)
+        : item.profit_growth,
+    profit_rank:
+      typeof item.profit_rank === "string"
+        ? JSON.parse(item.profit_rank)
+        : item.profit_rank,
+    last_updated: new Date(item.last_updated),
+    Indicator:
+      item.Indicator === "Sell" || item.Indicator === "Buy/Hold"
+        ? item.Indicator
+        : "Buy/Hold", // Ensure valid type
+    SellPrice: item.SellPrice ?? null, // Ensure null or number
+  }));
+
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Trade Signals</h1>
       <SkeletonWrapper isLoading={isLoading}>
         {data?.hasAccess ? (
           <div>
-            <TradingSignalsTable data={sampleData} />
+            {isMobile ? (
+              <CompanyAnalysisMobile data={parsedData} />
+            ) : (
+              <CompanyAnalysisTable data={parsedData} />
+            )}
           </div>
         ) : (
           <Button

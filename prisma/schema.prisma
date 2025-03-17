@@ -144,3 +144,57 @@ model TradeSignalAccess {
 
   @@map("tradeSignalAccess")
 }
+
+model CompanyAnalysis {
+  company_name       String   @id @db.VarChar(255)
+  current_market_price Decimal? @db.Decimal(18,2)
+  company_screener    String?  @db.VarChar(200)
+  median_pe          Decimal? @db.Decimal(10,2)
+  pe                 Decimal? @db.Decimal(10,2)
+  company_symbol     String?  @db.VarChar(50)
+  company_peers      Json?
+  sector             String?  @db.VarChar(100)
+  industry           String?  @db.VarChar(100)
+  pe_score           Decimal? @db.Decimal(10,2)
+  peg_score          Decimal? @db.Decimal(10,2)
+  peg_ranking        Int?
+  de_score          Decimal? @db.Decimal(10,2)
+  de_ranking        Int?
+  piotroski         Int?
+  piotroski_rank    Int?
+  piotroski_score   Decimal? @db.Decimal(10,2)
+  daily_filter_score Decimal? @db.Decimal(10,2)
+  sales_growth      String?  @db.VarChar(300)  // JSON-like stored as a string
+  sales_rank        String?  @db.VarChar(300)  // JSON-like stored as a string
+  sales_score       Decimal? @db.Decimal(10,2)
+  sales_filter_score Decimal? @db.Decimal(10,2)
+  profit_growth     String?  @db.VarChar(300)  // JSON-like stored as a string
+  profit_rank       String?  @db.VarChar(300)  // JSON-like stored as a string
+  profit_score      Decimal? @db.Decimal(10,2)
+  profit_filter_score Decimal? @db.Decimal(10,2)
+  roe_10y          Decimal? @db.Decimal(10,2)
+  roe_5y           Decimal? @db.Decimal(10,2)
+  roe_3y           Decimal? @db.Decimal(10,2)
+  roe_1y           Decimal? @db.Decimal(10,2)
+  roe_rank_10y     Int?
+  roe_rank_5y      Int?
+  roe_rank_3y      Int?
+  roe_rank_1y      Int?
+  score            Decimal? @db.Decimal(10,2)
+  filter_count     Int?
+  total_ranks      Int?
+  last_updated     DateTime? @db.DateTime
+  Total_Filter_Score Decimal? @db.Decimal(10,2)
+  sum_score        Decimal? @db.Decimal(10,2)
+  final_score      Decimal? @db.Decimal(10,2)
+  target_price     Decimal? @db.Decimal(18,2)
+  Indicator        IndicatorType?
+  SellPrice        Decimal? @db.Decimal(18,2)
+
+  @@map("company_analysis")
+}
+
+enum IndicatorType {
+  Buy_Hold @map("Buy/Hold")
+  Sell
+}
