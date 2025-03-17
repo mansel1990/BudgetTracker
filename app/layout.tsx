@@ -4,6 +4,8 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import RootProviders from "@/components/providers/RootProviders";
 import { Toaster } from "@/components/ui/sonner";
+import MainNavbar from "@/components/MainNavbar";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +36,7 @@ export default function RootLayout({
           <Toaster richColors position="bottom-right" />
           <RootProviders>
             <main>{children}</main>
+            <ReactQueryDevtools initialIsOpen={false} />
           </RootProviders>
         </body>
       </html>

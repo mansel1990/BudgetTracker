@@ -33,9 +33,10 @@ const CategoryPicker = ({ type, value: selectedValue, onChange }: Props) => {
   const [value, setValue] = React.useState(selectedValue || "");
 
   useEffect(() => {
-    if (!value) return;
-    onChange(value);
-  }, [onChange, value]);
+    if (selectedValue !== undefined && selectedValue !== value) {
+      setValue(selectedValue); // Ensure the local state is in sync with the parent
+    }
+  }, [selectedValue]);
 
   useEffect(() => {
     setValue(selectedValue || "");
@@ -51,13 +52,11 @@ const CategoryPicker = ({ type, value: selectedValue, onChange }: Props) => {
     (category: category) => category.name === value
   );
 
-  const successCallback = useCallback(
-    (category: category) => {
-      setValue(category.name);
-      setOpen((prev) => !prev);
-    },
-    [setValue, setOpen]
-  );
+  const successCallback = useCallback((category: category) => {
+    setValue(category.name);
+    onChange(category.name);
+    setOpen(false);
+  }, []);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -91,25 +90,25 @@ const CategoryPicker = ({ type, value: selectedValue, onChange }: Props) => {
             </p>
           </CommandEmpty>
           <CommandGroup>
-            <CommandList>
-              {categoriesQuery.data &&
-                categoriesQuery.data.map((category: category) => (
-                  <CommandItem
-                    key={category.name}
-                    onSelect={() => {
-                      setValue(category.name);
-                      setOpen((prev) => !prev);
-                    }}
-                  >
-                    <CategoryRow category={category} />
-                    <Check
-                      className={cn(
-                        "mr-2 w-4 h-4 opacity-0",
-                        value === category.name && "opacity-100"
-                      )}
-                    />
-                  </CommandItem>
-                ))}
+            <CommandList className="max-h-[300px] overflow-y-auto">
+              {categoriesQuery.data?.map((category: category) => (
+                <CommandItem
+                  key={category.name}
+                  onSelect={() => {
+                    setValue(category.name);
+                    onChange(category.name);
+                    setOpen(false);
+                  }}
+                >
+                  <CategoryRow category={category} />
+                  <Check
+                    className={cn(
+                      "mr-2 w-4 h-4 opacity-0",
+                      value === category.name && "opacity-100"
+                    )}
+                  />
+                </CommandItem>
+              ))}
             </CommandList>
           </CommandGroup>
         </Command>

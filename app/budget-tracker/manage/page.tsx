@@ -186,7 +186,6 @@ const GroupDetails = () => {
   });
 
   const dataAvailable = groupQuery.data?.groupMembers?.length > 0;
-  console.log("Members ===> ", groupQuery.data?.groupMembers);
 
   return (
     <SkeletonWrapper isLoading={groupQuery.isLoading}>
