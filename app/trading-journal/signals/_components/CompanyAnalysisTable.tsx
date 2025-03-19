@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   ColumnDef,
   createColumnHelper,
@@ -40,46 +41,79 @@ interface Props {
 
 const columnHelper = createColumnHelper<CompanyAnalysisType>();
 
-const columns = [
-  columnHelper.accessor("company_name", {
-    header: (props) => (
-      <DataTableColumnHeader column={props.column} title="Company" />
-    ),
-    cell: ({ row }) => (
-      <a
-        href={row.original.company_screener}
-        className="text-blue-500 underline max-w-[250px] truncate block"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {row.original.company_symbol} - {row.original.company_name}
-      </a>
-    ),
-  }),
-  columnHelper.accessor("sector", {
-    header: "Sector",
-    cell: ({ row }) => (
-      <div className="max-w-[250px] truncate block">{row.original.sector}</div>
-    ),
-  }),
-  columnHelper.accessor("final_score", {
-    header: "Score",
-    cell: ({ getValue }) => <span>{getValue()}</span>,
-    sortingFn: "auto",
-  }),
-] as const;
-
 const CompanyAnalysisTable: React.FC<Props> = ({ data = [] }) => {
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [globalFilter, setGlobalFilter] = useState("");
+  const router = useRouter(); // ✅ Moved inside component
 
   const toggleRow = (id: string) => {
     setExpandedRow(expandedRow === id ? null : id);
   };
 
+  const columns: ColumnDef<CompanyAnalysisType, any>[] = [
+    columnHelper.accessor("company_name", {
+      header: (props) => (
+        <DataTableColumnHeader column={props.column} title="Company" />
+      ),
+      cell: ({ row }) => (
+        <span
+          className="text-blue-500 underline cursor-pointer max-w-[250px] truncate block"
+          onClick={() =>
+            router.push(
+              `/trading-journal/signals/${row.original.company_symbol}`
+            )
+          }
+        >
+          {row.original.company_symbol} - {row.original.company_name}
+        </span>
+      ),
+    }),
+    columnHelper.accessor("sector", {
+      header: "Sector",
+      cell: ({ row }) => (
+        <div className="max-w-[250px] truncate block">
+          {row.original.sector}
+        </div>
+      ),
+    }),
+    columnHelper.accessor("final_score", {
+      header: "Score",
+      cell: ({ getValue }) => {
+        const value = getValue();
+        const percentage = (Number(value || 0) / 32) * 100;
+        return (
+          <div className="flex items-center gap-2 w-32">
+            <div className="w-full bg-muted rounded-full h-2">
+              <div
+                className="bg-blue-500 h-2 rounded-full transition-all duration-500"
+                style={{ width: `${percentage}%` }}
+              />
+            </div>
+            <span className="text-sm font-medium whitespace-nowrap">
+              {((Number(value || 0) / 32) * 100).toFixed(0)}%
+            </span>
+          </div>
+        );
+      },
+      sortingFn: "auto",
+    }),
+    columnHelper.accessor("Indicator", {
+      header: "Signal",
+      cell: ({ row }) => (
+        <div
+          className={`w-4 h-4 rounded-full ${
+            row.original.Indicator === "Buy/Hold"
+              ? "bg-green-500 shadow-lg shadow-green-500/50"
+              : "bg-red-500 shadow-lg shadow-red-500/50"
+          }`}
+        />
+      ),
+    }),
+  ];
+
   const table = useReactTable({
     data,
-    columns: [...columns] as ColumnDef<CompanyAnalysisType, any>[],
+    columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -111,7 +145,6 @@ const CompanyAnalysisTable: React.FC<Props> = ({ data = [] }) => {
                       )}
                     </TableHead>
                   ))}
-                  <TableHead className="w-12">Details</TableHead>
                 </TableRow>
               ))}
             </TableHeader>
@@ -128,19 +161,6 @@ const CompanyAnalysisTable: React.FC<Props> = ({ data = [] }) => {
                           )}
                         </TableCell>
                       ))}
-                      <TableCell className="w-12 text-center">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => toggleRow(row.id)}
-                        >
-                          {expandedRow === row.id ? (
-                            <ChevronDown />
-                          ) : (
-                            <ChevronRight />
-                          )}
-                        </Button>
-                      </TableCell>
                     </TableRow>
                     {expandedRow === row.id && (
                       <TableRow>

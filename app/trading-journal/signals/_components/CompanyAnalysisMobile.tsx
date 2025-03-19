@@ -11,6 +11,7 @@ import {
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { CompanyAnalysisType } from "@/schema/companyAnalysis";
 import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
 
 interface Props {
   data: CompanyAnalysisType[];
@@ -23,6 +24,7 @@ const getScoreColor = (score: number) => {
 };
 
 const CompanyAnalysisMobile: React.FC<Props> = ({ data = [] }) => {
+  const router = useRouter();
   const [expanded, setExpanded] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState(""); // Add search state
 
@@ -53,6 +55,11 @@ const CompanyAnalysisMobile: React.FC<Props> = ({ data = [] }) => {
         <div
           key={company.company_symbol}
           className="border rounded-lg p-4 bg-gray-100 dark:bg-gray-800"
+          onClick={(e) => {
+            if (!(e.target as HTMLElement).closest("button")) {
+              router.push(`/trading-journal/signals/${company.company_symbol}`);
+            }
+          }}
         >
           {/* Basic Details */}
           <div className="flex justify-between items-center">
@@ -116,7 +123,13 @@ const CompanyAnalysisMobile: React.FC<Props> = ({ data = [] }) => {
                 >
                   <XAxis type="number" domain={[0, 1]} hide />
                   <YAxis dataKey="name" type="category" width={50} />
-                  <Tooltip />
+                  <Tooltip
+                    cursor={false}
+                    contentStyle={{
+                      backgroundColor: "transparent",
+                      border: "none",
+                    }}
+                  />
                   <Bar dataKey="score" fill="#10B981" barSize={6} />
                 </BarChart>
               </ResponsiveContainer>
