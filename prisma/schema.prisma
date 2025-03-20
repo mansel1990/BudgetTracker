@@ -10,12 +10,12 @@ datasource db {
 model user_settings {
   user_id       Int     @id @default(autoincrement())
   currency      String? @db.VarChar(100)
-  group_id      Int // Now referencing the Int group_id
+  group_id      Int
   clerk_user_id String  @unique
   isAutomated   Boolean @default(false)
+  group         groups  @relation(fields: [group_id], references: [group_id], onDelete: Cascade)
 
-  // Backrelations
-  group groups @relation(fields: [group_id], references: [group_id], onDelete: Cascade)
+  @@index([group_id], map: "user_settings_group_id_fkey")
 }
 
 model category {
@@ -31,15 +31,15 @@ model category {
 }
 
 model month_history {
-  group_id Int
   day      Int
   month    Int
   year     Int
   income   Decimal? @db.Decimal(10, 2)
   expense  Decimal? @db.Decimal(10, 2)
+  group_id Int
   group    groups   @relation(fields: [group_id], references: [group_id], onDelete: Cascade)
 
-  @@id([group_id, year, month, day]) // Include day for granularity
+  @@id([group_id, year, month, day])
 }
 
 model transactions {
@@ -49,52 +49,48 @@ model transactions {
   amount         Decimal?           @db.Decimal(10, 2)
   description    String?            @db.Text
   date           DateTime?          @db.Date
-  group_id       Int
   type           transactions_type?
   category       String?            @db.VarChar(255)
+  group_id       Int
   category_icon  String?
   group          groups             @relation(fields: [group_id], references: [group_id], onDelete: Cascade)
+
+  @@index([group_id], map: "transactions_group_id_fkey")
 }
 
 model year_history {
-  group_id Int
   month    Int
   year     Int
   income   Decimal? @db.Decimal(10, 2)
   expense  Decimal? @db.Decimal(10, 2)
+  group_id Int
   group    groups   @relation(fields: [group_id], references: [group_id], onDelete: Cascade)
 
-  @@id([group_id, year, month]) // Include month for granularity
+  @@id([group_id, year, month])
 }
 
 model groups {
-  group_id        Int             @id @default(autoincrement()) // Using auto-increment for Int group_id
+  group_id        Int             @id @default(autoincrement())
   group_name      String?         @db.VarChar(100)
   created_at      DateTime?       @default(now()) @db.Timestamp(0)
-  created_by      String // Admin of the group
-  users           user_settings[]
-  transactions    transactions[]
+  created_by      String
   categories      category[]
   month_histories month_history[]
+  transactions    transactions[]
+  users           user_settings[]
   year_histories  year_history[]
 }
 
-enum transactions_type {
-  income
-  expense
-}
-
 model Account {
-  account_id   Int               @id @default(autoincrement())
-  userId       String            @unique // Clerk user ID
-  name         String            @db.VarChar(255)
-  is_admin     Boolean           @default(false)
-  created_at   DateTime          @default(now()) @db.Timestamp(0)
-  updated_at   DateTime          @updatedAt @db.Timestamp(0)
-  transactions FundTransaction[]
-  trades       Trade[]
-
+  account_id        Int                @id @default(autoincrement())
+  userId            String             @unique
+  name              String             @db.VarChar(255)
+  created_at        DateTime           @default(now()) @db.Timestamp(0)
+  updated_at        DateTime           @updatedAt @db.Timestamp(0)
+  is_admin          Boolean            @default(false)
+  transactions      FundTransaction[]
   tradeSignalAccess TradeSignalAccess?
+  trades            Trade[]
 
   @@map("accounts")
 }
@@ -104,94 +100,99 @@ model FundTransaction {
   account_id       Int
   amount           Decimal  @db.Decimal(10, 2)
   type             String   @db.VarChar(10)
-  amount_in_market Decimal? @db.Decimal(10, 2)
-  notes            String?  @db.Text
   created_at       DateTime @default(now()) @db.Timestamp(0)
   updated_at       DateTime @updatedAt @db.Timestamp(0)
+  notes            String?  @db.Text
+  amount_in_market Decimal? @db.Decimal(10, 2)
   account          Account  @relation(fields: [account_id], references: [account_id], onDelete: Cascade)
 
+  @@index([account_id], map: "fund_transactions_account_id_fkey")
   @@map("fund_transactions")
 }
 
 model Trade {
-  trade_id    Int      @id @default(autoincrement())
-  account_id  Int
-  symbol      String   @db.VarChar(10)
-  shares      Decimal  @db.Decimal(10, 2)
-  entry_price Decimal  @db.Decimal(10, 2)
-  exit_price  Decimal  @db.Decimal(10, 2)
-  amount      Decimal  @db.Decimal(10, 2)
-  profit_loss Decimal  @db.Decimal(10, 2)
-  type        String   @db.VarChar(4) // 'buy' or 'sell'
-  notes       String?  @db.Text
-  created_at  DateTime @default(now()) @db.Timestamp(0)
-  updated_at  DateTime @updatedAt @db.Timestamp(0)
-  account     Account  @relation(fields: [account_id], references: [account_id], onDelete: Cascade)
+  trade_id       Int      @id @default(autoincrement())
+  account_id     Int
+  company_symbol String?  @db.VarChar(10)
+  shares         Decimal  @db.Decimal(10, 2)
+  amount         Decimal  @db.Decimal(10, 2)
+  type           String   @db.VarChar(4)
+  created_at     DateTime @default(now()) @db.Timestamp(0)
+  updated_at     DateTime @updatedAt @db.Timestamp(0)
+  price          Decimal? @db.Decimal(10, 2)
+  notes          String?  @db.Text
+  profit_loss    Decimal  @db.Decimal(10, 2)
+  company_name   String   @db.VarChar(255)
+  account        Account  @relation(fields: [account_id], references: [account_id], onDelete: Cascade)
 
+  @@index([account_id], map: "trades_account_id_fkey")
   @@map("trades")
 }
 
 model TradeSignalAccess {
   access_id  Int       @id @default(autoincrement())
-  userId     String    @unique // Clerk user ID
-  status     String    @default("pending") @db.VarChar(10) // 'pending', 'approved', 'rejected'
+  userId     String    @unique
+  status     String    @default("pending") @db.VarChar(10)
   expires_at DateTime?
   created_at DateTime  @default(now()) @db.Timestamp(0)
   updated_at DateTime  @updatedAt @db.Timestamp(0)
-
-  // Owning side: foreign key field with relation attributes.
-  account Account @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  account    Account   @relation(fields: [userId], references: [userId], onDelete: Cascade)
 
   @@map("tradeSignalAccess")
 }
 
 model CompanyAnalysis {
-  company_name       String   @id @db.VarChar(255)
-  current_market_price Decimal? @db.Decimal(18,2)
-  company_screener    String?  @db.VarChar(200)
-  median_pe          Decimal? @db.Decimal(10,2)
-  pe                 Decimal? @db.Decimal(10,2)
-  company_symbol     String?  @db.VarChar(50)
-  company_peers      Json?
-  sector             String?  @db.VarChar(100)
-  industry           String?  @db.VarChar(100)
-  pe_score           Decimal? @db.Decimal(10,2)
-  peg_score          Decimal? @db.Decimal(10,2)
-  peg_ranking        Int?
-  de_score          Decimal? @db.Decimal(10,2)
-  de_ranking        Int?
-  piotroski         Int?
-  piotroski_rank    Int?
-  piotroski_score   Decimal? @db.Decimal(10,2)
-  daily_filter_score Decimal? @db.Decimal(10,2)
-  sales_growth      String?  @db.VarChar(300)  // JSON-like stored as a string
-  sales_rank        String?  @db.VarChar(300)  // JSON-like stored as a string
-  sales_score       Decimal? @db.Decimal(10,2)
-  sales_filter_score Decimal? @db.Decimal(10,2)
-  profit_growth     String?  @db.VarChar(300)  // JSON-like stored as a string
-  profit_rank       String?  @db.VarChar(300)  // JSON-like stored as a string
-  profit_score      Decimal? @db.Decimal(10,2)
-  profit_filter_score Decimal? @db.Decimal(10,2)
-  roe_10y          Decimal? @db.Decimal(10,2)
-  roe_5y           Decimal? @db.Decimal(10,2)
-  roe_3y           Decimal? @db.Decimal(10,2)
-  roe_1y           Decimal? @db.Decimal(10,2)
-  roe_rank_10y     Int?
-  roe_rank_5y      Int?
-  roe_rank_3y      Int?
-  roe_rank_1y      Int?
-  score            Decimal? @db.Decimal(10,2)
-  filter_count     Int?
-  total_ranks      Int?
-  last_updated     DateTime? @db.DateTime
-  Total_Filter_Score Decimal? @db.Decimal(10,2)
-  sum_score        Decimal? @db.Decimal(10,2)
-  final_score      Decimal? @db.Decimal(10,2)
-  target_price     Decimal? @db.Decimal(18,2)
-  Indicator        IndicatorType?
-  SellPrice        Decimal? @db.Decimal(18,2)
+  company_name         String         @id @db.VarChar(255)
+  current_market_price Decimal?       @db.Decimal(18, 2)
+  company_screener     String?        @db.VarChar(200)
+  median_pe            Decimal?       @db.Decimal(10, 2)
+  pe                   Decimal?       @db.Decimal(10, 2)
+  company_symbol       String?        @db.VarChar(50)
+  company_peers        Json?
+  sector               String?        @db.VarChar(100)
+  industry             String?        @db.VarChar(100)
+  pe_score             Decimal?       @db.Decimal(10, 2)
+  peg_score            Decimal?       @db.Decimal(10, 2)
+  peg_ranking          Int?
+  de_score             Decimal?       @db.Decimal(10, 2)
+  de_ranking           Int?
+  piotroski            Int?
+  piotroski_rank       Int?
+  piotroski_score      Decimal?       @db.Decimal(10, 2)
+  daily_filter_score   Decimal?       @db.Decimal(10, 2)
+  sales_growth         String?        @db.VarChar(300)
+  sales_rank           String?        @db.VarChar(300)
+  sales_score          Decimal?       @db.Decimal(10, 2)
+  sales_filter_score   Decimal?       @db.Decimal(10, 2)
+  profit_growth        String?        @db.VarChar(300)
+  profit_rank          String?        @db.VarChar(300)
+  profit_score         Decimal?       @db.Decimal(10, 2)
+  profit_filter_score  Decimal?       @db.Decimal(10, 2)
+  roe_10y              Decimal?       @db.Decimal(10, 2)
+  roe_5y               Decimal?       @db.Decimal(10, 2)
+  roe_3y               Decimal?       @db.Decimal(10, 2)
+  roe_1y               Decimal?       @db.Decimal(10, 2)
+  roe_rank_10y         Int?
+  roe_rank_5y          Int?
+  roe_rank_3y          Int?
+  roe_rank_1y          Int?
+  score                Decimal?       @db.Decimal(10, 2)
+  filter_count         Int?
+  total_ranks          Int?
+  last_updated         DateTime?      @db.DateTime(0)
+  Total_Filter_Score   Decimal?       @db.Decimal(10, 2)
+  sum_score            Decimal?       @db.Decimal(10, 2)
+  final_score          Decimal?       @db.Decimal(10, 2)
+  target_price         Decimal?       @db.Decimal(18, 2)
+  Indicator            IndicatorType?
+  SellPrice            Decimal?       @db.Decimal(18, 2)
 
   @@map("company_analysis")
+}
+
+enum transactions_type {
+  income
+  expense
 }
 
 enum IndicatorType {
