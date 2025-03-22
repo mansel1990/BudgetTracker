@@ -53,16 +53,6 @@ export function calculateTradeMetrics(trades: SingleTradeType[]) {
   const profitPercentage =
     costBasisForSold > 0 ? (profit / costBasisForSold) * 100 : 0;
 
-  console.log({
-    avgBuyPrice,
-    avgSellPrice,
-    totalBoughtShares,
-    totalSoldShares,
-    netShares, // Remaining shares
-    totalAmount: netShares * avgBuyPrice, // Total cost basis for remaining shares
-    profitPercentage,
-  });
-
   return {
     avgBuyPrice,
     avgSellPrice,

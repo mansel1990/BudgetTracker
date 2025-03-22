@@ -102,7 +102,6 @@ const TradeForm = () => {
   });
 
   const onSubmit = (data: TradeFormValues) => {
-    console.log("Trade Data:", data);
     const formattedData = {
       company_symbol: data.company_symbol,
       company_name: data.company_name,
