@@ -151,6 +151,10 @@ const TradingNavbar = () => {
     queryFn: fetchAccountDetails,
   });
 
+  if (account?.userId) {
+    localStorage.setItem("accountId", account.userId);
+  }
+
   const navItems = account?.is_admin
     ? [...baseItems, { label: "Admin", link: "/trading-journal/admin" }]
     : baseItems;

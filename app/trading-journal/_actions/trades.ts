@@ -10,32 +10,6 @@ interface CreateTradeParams {
   type: "buy" | "sell";
 }
 
-export async function createTrade({
-  accountId,
-  symbol,
-  shares,
-  price,
-  type,
-}: CreateTradeParams) {
-  try {
-    const amount = shares * price;
-    const trade = await prisma.trade.create({
-      data: {
-        account_id: accountId,
-        symbol: symbol.toUpperCase(),
-        shares,
-        price,
-        amount,
-        type,
-      },
-    });
-    return { success: true, data: trade };
-  } catch (error) {
-    console.error("Error creating trade:", error);
-    return { success: false, error: "Failed to create trade" };
-  }
-}
-
 export async function getTrades(accountId: number) {
   try {
     const trades = await prisma.trade.findMany({
@@ -60,7 +34,7 @@ export async function calculateRealizedPL(accountId: number) {
     let realizedPL = 0;
 
     trades.forEach((trade) => {
-      const { symbol, shares, price, type } = trade;
+      const { company_name: symbol, shares, price, type } = trade;
       if (!positions[symbol]) {
         positions[symbol] = { shares: 0, totalCost: 0 };
       }
