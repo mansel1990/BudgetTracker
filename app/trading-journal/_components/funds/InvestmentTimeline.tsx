@@ -77,19 +77,19 @@ const InvestmentTimeline = () => {
             <Line
               type="monotone"
               dataKey="deposits"
-              stroke="#16a34a"
+              stroke="#3b82f6"
               strokeWidth={2}
             />
             <Line
               type="monotone"
               dataKey="withdrawals"
-              stroke="#dc2626"
+              stroke="#ea580c"
               strokeWidth={2}
             />
             <Line
               type="monotone"
               dataKey="marketValue"
-              stroke="#3b82f6"
+              stroke="#aecdfb"
               strokeWidth={2}
             />
           </ComposedChart>
